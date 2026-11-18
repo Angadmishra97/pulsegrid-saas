@@ -1,0 +1,44 @@
+const express = require('express');
+const cors = require('cors');
+require('dotenv').config();
+
+const connectDB = require('./config/db');
+const authRoutes = require('./routes/auth.routes');
+const projectRoutes = require('./routes/project.routes');
+const taskRoutes = require('./routes/task.routes');
+
+
+const app = express();
+const PORT = process.env.PORT || 5000;
+
+// Connect to MongoDB Database
+connectDB();
+
+// Global Middleware
+//app.use(cors());
+app.use(cors({
+  origin: [
+    'http://localhost:5173',
+    process.env.CLIENT_URL // e.g., https://pulsegrid-saas.vercel.app
+  ],
+  credentials: true
+}));
+app.use(express.json());
+app.use('/api/auth', authRoutes);
+app.use('/api/projects', projectRoutes);
+app.use('/api/tasks', taskRoutes);
+
+
+// API Base Health check endpoint
+app.get('/api/health', (req, res) => {
+  res.status(200).json({
+    status: 'success',
+    message: 'PulseGrid SaaS Server is up and running!',
+    timestamp: new Date().toISOString()
+  });
+});
+
+// Start listening
+app.listen(PORT, () => {
+  console.log(` Server active on http://localhost:${PORT}`);
+});
