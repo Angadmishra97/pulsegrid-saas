@@ -7,7 +7,6 @@ const authRoutes = require('./routes/auth.routes');
 const projectRoutes = require('./routes/project.routes');
 const taskRoutes = require('./routes/task.routes');
 
-
 const app = express();
 const PORT = process.env.PORT || 5000;
 
@@ -15,19 +14,21 @@ const PORT = process.env.PORT || 5000;
 connectDB();
 
 // Global Middleware
-//app.use(cors());
+const allowedOrigins = [
+  'http://localhost:5173',
+  process.env.CLIENT_URL ? process.env.CLIENT_URL.trim().replace(/\/$/, '') : null
+].filter(Boolean);
+
 app.use(cors({
-  origin: [
-    'http://localhost:5173',
-    process.env.CLIENT_URL // e.g., https://pulsegrid-saas.vercel.app
-  ],
+  origin: allowedOrigins,
   credentials: true
 }));
+
 app.use(express.json());
+
 app.use('/api/auth', authRoutes);
 app.use('/api/projects', projectRoutes);
 app.use('/api/tasks', taskRoutes);
-
 
 // API Base Health check endpoint
 app.get('/api/health', (req, res) => {

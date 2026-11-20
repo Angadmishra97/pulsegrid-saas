@@ -3,6 +3,16 @@ const jwt = require('jsonwebtoken');
 const Tenant = require('../models/tenant.model');
 const User = require('../models/user.model');
 
+// Helper to generate a clean, unique organization slug
+const buildUniqueSlug = (companyName, slug) => {
+  const source = (slug && String(slug).trim()) || String(companyName || 'org');
+  const baseSlug = source
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '') || 'org';
+  const suffix = Math.floor(1000 + Math.random() * 9000);
+  return `${baseSlug}-${suffix}`;
+};
 
 // Register a new Tenant Organization & Admin User
 exports.register = async (req, res) => {
@@ -16,7 +26,8 @@ exports.register = async (req, res) => {
     }
 
     // 1. Create Tenant Organization
-    const tenant = new Tenant({ name: companyName, slug });
+    const finalSlug = buildUniqueSlug(companyName, slug);
+    const tenant = new Tenant({ name: companyName, slug: finalSlug });
     await tenant.save();
 
     // 2. Hash password securely
